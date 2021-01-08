@@ -26,10 +26,6 @@ class CocktailDb::Drink
     @@all.select {|drink| drink.category == category}
   end
 
-  # def self.find_by_name(drink_name)
-  #   @@all.select {|drink| drink.name == drink_name}.first
-  # end
-
   def self.search_for_drink(search_query)
     @@all.select {|drink| drink.name.downcase.start_with?(search_query.downcase)}
   end

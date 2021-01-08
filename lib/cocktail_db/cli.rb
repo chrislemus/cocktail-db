@@ -1,20 +1,21 @@
-require 'pry'
 class CocktailDb::CLI
   URL = "https://www.thecocktaildb.com/api/json/v1/1/search.php?f=m"
-  attr_reader :results_per_page
+  attr_reader :results_per_page, :header, :menu_page
   def initialize
+    @header = []
+    @menu_branch = 1
     @results_per_page = 10
   end
   def get_tipsy
     puts 'WELCOME TO COCKTAIL DB!'.cyan.blink
     CocktailDb::Data.new.create_drinks  
     user_input = nil
-    print_header 
+    print_header('Home', 'menu - loads menu') 
     until user_input == 'exit'
-      
       user_input = gets.strip
-      main_method_called = user_input.to_i.between?(2,5)
-      print_header if !main_method_called
+      new_branch_triggered = user_input.to_i.between?(2,5)
+      print_header('Home', 'menu - loads menu') if !new_branch_triggered
+      @menu_branch += 1 if new_branch_triggered
       case user_input
       when '1';  get_drinks_count
       when '2';  list_all_drinks; 
@@ -28,8 +29,11 @@ class CocktailDb::CLI
         else
           p('invalid input', 'red') 
         end
+      end 
+      if new_branch_triggered
+        @menu_branch = 1
+        print_header('Home', 'menu - loads menu') 
       end
-      print_header if main_method_called
     end
   end
 
@@ -37,13 +41,12 @@ class CocktailDb::CLI
     p("there are #{CocktailDb::Drink.all.length} drinks in database", 'green')
   end
 
-  def print_header(is_home=true, header=false, sub_head = false)
-    header  = header ? " Home ► #{header}": "        Home        " 
-    if is_home
-      header = "        Home        " 
-      sub_head = "menu - loads menu"
-    end
-    puts header.bg_cyan.bold
+  def print_header( header, sub_head=false)
+    @header = @header.slice!(0, @menu_branch-1)
+    @header << header
+    header =  @header.join(' ► ')
+    s = '        '
+    puts "#{s}#{header}#{s}".bg_cyan.bold
     p(sub_head) if sub_head
   end
 
@@ -67,27 +70,31 @@ class CocktailDb::CLI
     page_results(drinks, "Drinks List", 'drink info')
   end
 
+  def list_all_drink_glass_types
+    page_results(CocktailDb::Drink.get_glass_types, "Glass types", "drinks by glass type")
+  end
+
+  def list_all_drink_categories
+    page_results(CocktailDb::Drink.get_categories, "Categories", "drinks by category")
+  end
+
   def list_drinks_with_filter(filter_type, filter_param)
     drinks = nil
     case filter_type
-    when 'Glass types'
-      drinks = CocktailDb::Drink.get_drinks_by_glass_type(filter_param)
-    when 'Categories'
-      drinks = CocktailDb::Drink.get_drinks_by_category(filter_param)
+    when 'Glass types'; drinks = CocktailDb::Drink.get_drinks_by_glass_type(filter_param)
+    when 'Categories'; drinks = CocktailDb::Drink.get_drinks_by_category(filter_param)
     end
-
-    header = "#{filter_type} ► #{filter_param} ► Drinks"
-    page_results(drinks, header, 'drink info')
+    page_results(drinks, filter_param, 'drink info')
   end
 
-  def page_results(results, results_title, data_type)
+  def page_results(results, header, data_type)
     user_input = nil 
     sub_head = "n - next page | p - previous page | bb - go back \n*enter item number to get #{data_type}"
     page_number = 1
     results_text = data_type != 'drink info' ? results : results.map{|drink| drink.name}
     number_of_pages = (results.length.to_f/@results_per_page.to_f).ceil
     until user_input == 'bb'
-      print_header(false, results_title, sub_head)
+      print_header(header, sub_head)
       print_page_results(page_number, results_text)
       p("-- PAGE #{page_number} of #{number_of_pages} --", 'cyan')
       user_input = gets.strip
@@ -97,20 +104,22 @@ class CocktailDb::CLI
       when 'p'
         (page_number-1).between?(1,number_of_pages) ? page_number-=1 : p('no page to show, please try again', 'red')
       else
-        #user has selected a drink
-        if user_input.to_i.between?(1,results.length)
-          user_selection = results[(user_input.to_i)-1]
+        user_selection = user_input.to_i.between?(1,results.length) ? results[(user_input.to_i)-1] : false
+        if user_selection
+          @menu_branch += 1
           case data_type
-          when 'drink info'; display_drink_info(user_selection, results_title)
-          when 'drinks by category'; list_drinks_with_filter(results_title, user_selection) 
-          when 'drinks by glass type'; list_drinks_with_filter(results_title, user_selection) 
+          when 'drink info'; display_drink_info(user_selection)
+          when 'drinks by category'; list_drinks_with_filter(header, user_selection) 
+          when 'drinks by glass type'; list_drinks_with_filter(header, user_selection) 
           end
+          @menu_branch -= 1
         elsif  user_input != 'bb'
           puts 'invalid input'.red
         end
       end
     end
   end
+
 
   def print_page_results(page_number, results)
     first_item_idx = (page_number * @results_per_page) - @results_per_page
@@ -121,19 +130,9 @@ class CocktailDb::CLI
     }
   end
 
-  def list_all_drink_glass_types
-    page_results(CocktailDb::Drink.get_glass_types, "Glass types", "drinks by glass type")
-  end
-
-  def list_all_drink_categories
-    page_results(CocktailDb::Drink.get_categories, "Categories", "drinks by category")
-  end
-
-
-
-  def display_drink_info(drink, header)
+  def display_drink_info(drink)
     ingredients = drink.ingredients.map{|i| "∙ #{i[0]}: #{i[1]}"}.join("\n")
-    print_header(false, header + " ► #{drink.name} ", "press 'Enter' to go back")
+    print_header(drink.name, "press 'Enter' to go back")
     drink_info  = [
       "name: #{drink.name}", 
       "alcoholic: #{drink.alcoholic}",
@@ -146,10 +145,9 @@ class CocktailDb::CLI
     gets.strip
   end
 
-
   def search_for_drink
     header = 'Search for drink'
-    print_header(false, header, 'bb - go back')
+    print_header( 'Search for drink', 'bb - go back')
     p('**search drinks by name, entire name not require just first few letters work.', 'cyan')
     user_input = gets.strip
     results = CocktailDb::Drink.search_for_drink(user_input)

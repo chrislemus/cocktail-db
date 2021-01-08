@@ -1,39 +1,36 @@
 # CocktailDb
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/cocktail_db`. To experiment with that code, run `bin/console` for an interactive prompt.
+Welcome to CocktailDb CLI! The place where you can get information for hundreds of drinks. You can look up drinks by name, categories, or glass types.
 
-TODO: Delete this and the text above, and describe your gem
+### sample of drink info
 
-## Installation
+    name: Mojito
+    alcoholic: Alcoholic
+    category: Cocktail
+    glass: Highball glass
 
-Add this line to your application's Gemfile:
+    instructions:
+    Muddle mint leaves with sugar and lime juice. Add a splash of soda water and fill the glass with cracked ice. Pour the rum and top with soda water. Garnish and serve with straw.
 
-```ruby
-gem 'cocktail_db'
-```
-
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install cocktail_db
+    ingredients:
+    ∙ Light rum: 2-3 oz
+    ∙ Lime: Juice of 1
+    ∙ Sugar: 2 tsp
+    ∙ Mint: 2-4
+    ∙ Soda water:
 
 ## Usage
 
-TODO: Write usage instructions here
+Run `bundle install` to installed required gems.
+Run `ruby bin/cocktail-db.rb` to start CocktailDb CLI
 
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+- The header will always display your current working directory / branch
+- After drinks have loaded on initialize enter `menu` to load menu items / commands list
+- list of available commands will always display under header
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/<github username>/cocktail_db.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/chrislemus/cocktail-db.
 
 ## License
 

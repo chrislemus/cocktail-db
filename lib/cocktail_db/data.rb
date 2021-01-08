@@ -8,7 +8,7 @@ class CocktailDb::Data
   end
 
   def fetch_all_drinks_by_alphabet
-    alphabet = ('a'..'b').to_a
+    alphabet = ('a'..'z').to_a
     drinks = alphabet.map.with_index {|letter, idx| 
       show_progress(idx, alphabet.length)
       JSON.parse(self.api_request(URL + letter))['drinks'] 
