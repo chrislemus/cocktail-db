@@ -21,7 +21,7 @@ Welcome to CocktailDb CLI! The place where you can get information for hundreds 
 
 ## Usage
 
-Run `bundle install` to installed required gems.
+Run `bundle install` to install required gems.
 Run `ruby bin/cocktail-db.rb` to start CocktailDb CLI
 
 - The header will always display your current working directory / branch
